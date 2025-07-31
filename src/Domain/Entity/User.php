@@ -4,35 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domain\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
 use App\Domain\Enum\UserRoleEnum;
 use App\Domain\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use ApiPlatform\Metadata\Patch;
-use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
-use ApiPlatform\Metadata\Delete;
-use ApiPlatform\Metadata\Get;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use App\State\UserPasswordHasher;
-use ApiPlatform\Metadata\GetCollection;
 
-
-#[ApiResource(
-    operations: [
-        new GetCollection(),
-        #new Post(processor: UserPasswordHasher::class, validationContext: ['groups' => ['Default', 'user:create']]),
-        new Get(),
-        #new Put(processor: UserPasswordHasher::class),
-        #new Patch(processor: UserPasswordHasher::class),
-        new Delete(),
-    ],
-    normalizationContext: ['groups' => ['user:read']],
-    denormalizationContext: ['groups' => ['user:create', 'user:update']],
-)]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[UniqueEntity('email')]
@@ -318,5 +297,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function eraseCredentials(): void {}
+    public function eraseCredentials(): void
+    {
+    }
 }

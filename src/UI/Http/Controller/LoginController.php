@@ -17,7 +17,8 @@ class LoginController extends AbstractController
     public function __construct(
         private UserRepository $userRepository,
         private UserPasswordHasherInterface $passwordEncoder
-    ) {}
+    ) {
+    }
 
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
     public function login(Request $request): JsonResponse
@@ -45,10 +46,12 @@ class LoginController extends AbstractController
             return new JsonResponse(['error' => 'Brak dostępu - wymagana rola ADMIN'], 403);
         }
 
-        return new JsonResponse([
+        return new JsonResponse(
+            [
             'email' => $user->getEmail(),
             'roles' => $user->getRoles(),
             'message' => 'Zalogowano poprawnie',
-        ]);
+            ]
+        );
     }
 }

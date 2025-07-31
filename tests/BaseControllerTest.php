@@ -36,10 +36,12 @@ abstract class BaseControllerTest extends WebTestCase
                 'first_name' => 'Admin',
                 'last_name' => 'Systemowy',
                 'employee_number' => '0001',
-                'roles' => json_encode([
-                    UserRoleEnum::USER->value,
-                    UserRoleEnum::ADMIN->value
-                ]),
+                'roles' => json_encode(
+                    [
+                        UserRoleEnum::USER->value,
+                        UserRoleEnum::ADMIN->value
+                    ]
+                ),
             ]
         );
     }

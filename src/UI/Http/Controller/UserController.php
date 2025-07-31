@@ -23,7 +23,8 @@ class UserController extends AbstractController
         private UserRepository $userRepository,
         private EntityManagerInterface $em,
         private readonly UserPasswordHasherInterface $passwordHasher
-    ) {}
+    ) {
+    }
 
     #[OA\Get(
         path: '/api/list-users',
@@ -80,6 +81,6 @@ class UserController extends AbstractController
         $this->em->persist($user);
         $this->em->flush();
 
-        return $this->json(['saved' => 'ok'],200);
+        return $this->json(['saved' => 'ok'], 200);
     }
-} 
+}

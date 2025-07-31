@@ -28,14 +28,23 @@ class UserControllerTest extends BaseControllerTest
 
     public function testCreateUser(): void
     {
-        $this->request('POST', '/api/new-user', [], [], ['CONTENT_TYPE' => 'application/json'], json_encode([
-            'email' => 'test@example.com',
-            'password' => $_ENV['TEST_USER_PASSWORD'],
-            'firstName' => 'John',
-            'lastName' => 'Doe',
-            'employeeNumber' => 'EMP001',
-            'isActive' => 'true',
-        ]));
+        $this->request(
+            'POST',
+            '/api/new-user',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode(
+                [
+                    'email' => 'test@example.com',
+                    'password' => $_ENV['TEST_USER_PASSWORD'],
+                    'firstName' => 'John',
+                    'lastName' => 'Doe',
+                    'employeeNumber' => 'EMP001',
+                    'isActive' => 'true',
+                ]
+            )
+        );
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(200);

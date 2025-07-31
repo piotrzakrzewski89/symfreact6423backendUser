@@ -5,13 +5,11 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gnupg g++ procps openssl git unzip zlib1g-dev libzip-dev \
     libfreetype6-dev libpng-dev libjpeg-dev libicu-dev libonig-dev libxslt1-dev acl \
-    librabbitmq-dev \
+    librabbitmq-dev libpq-dev \
  && docker-php-ext-configure gd --with-jpeg --with-freetype \
- && apt-get install -y libpq-dev \
- && docker-php-ext-install mysqli pdo pdo_mysql pdo_pgsql pgsql zip xsl gd intl opcache exif mbstring \
- && pecl install amqp \
- && docker-php-ext-enable amqp \
- && docker-php-ext-enable pdo_mysql \
+ && docker-php-ext-install -j$(nproc) mysqli pdo pdo_mysql pdo_pgsql pgsql zip xsl gd intl opcache exif mbstring \
+ && pecl install amqp xdebug \
+ && docker-php-ext-enable amqp xdebug pdo_mysql \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
