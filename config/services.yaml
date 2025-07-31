@@ -1,0 +1,10 @@
+services:
+    App\UI\Http\Controller\:
+        resource: "../src/UI/Http/Controller"
+        tags: ["controller.service_arguments"]
+        autowire: true
+        autoconfigure: true
+    App\Domain\Repository\:
+        resource: '../src/Domain/Repository'
+        autowire: true
+        autoconfigure: true

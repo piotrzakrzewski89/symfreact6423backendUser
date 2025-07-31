@@ -1,0 +1,56 @@
+services:
+    php:
+        build:
+            context: ./docker/php
+            args:
+                TIMEZONE: Europe/Warsaw
+        container_name: user_php
+        volumes:
+            - ./:/app
+            - './docker/php/conf.d:/usr/local/etc/php/conf.d'
+            - 'php_composer_data:/root/.composer'
+        networks:
+            - network_user
+            - network_rabbit
+            
+    user-www:
+        build: ./docker/www
+        container_name: user-www
+        ports:
+            - 8082:80
+        volumes:
+            - ./:/app
+            - ./docker/www/conf.d:/etc/nginx/conf.d
+        networks:
+            - network_user
+
+    user-db:
+        image: postgres:latest
+        container_name: user-db
+        volumes:
+            - user_db_data:/var/lib/postgresql/data-user
+        ports:
+            - 5434:5432
+        environment:
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: user
+            TZ: Europe/Warsaw
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U user"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - network_user
+
+volumes:
+    user_db_data:
+    php_composer_data:
+
+networks:
+  network_user:
+    name: network_user
+    driver: bridge
+  network_rabbit:
+    external: true
+    name: network_rabbit
