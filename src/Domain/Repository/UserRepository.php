@@ -18,12 +18,28 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
-    public function getAllUsers(): array
+    public function getAllUsersActive(): array
     {
         return $this->createQueryBuilder('u')
-            ->where('u.id != :AdminId')
-            ->setParameter('AdminId', 1)
+            ->where('u.isDeleted = false')
             ->getQuery()
             ->getResult();
+    }
+
+    public function getAllUsersDeleted(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.isDeleted = true')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getUser(int $id): User
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getSingleResult();
     }
 }

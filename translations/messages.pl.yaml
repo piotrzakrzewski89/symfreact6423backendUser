@@ -1,0 +1,19 @@
+email.user.created.subject: "Pracownik został utworzony"
+email.user.created.body: |
+  <p>Pracownik <strong>%firstName% %lastName%</strong> o numerze kadrowym <strong>%employeeNumber%</strong> został utworzony w systemie.</p>
+  <p><strong>Email kontaktowy:</strong> %email%</p>
+
+email.user.updated.subject: "Pracownik został zaktualizowany"
+email.user.updated.body: |
+  <p>Pracownik <strong>%firstName% %lastName%</strong> o numerze kadrowym <strong>%employeeNumber%</strong> został zmodyfikowany w systemie.</p>
+  <p><strong>Email kontaktowy:</strong> %email%</p>
+
+email.user.deleted.subject: "Pracownik został usunięty"
+email.user.deleted.body: |
+  <p>Pracownik <strong>%firstName% %lastName%</strong> o numerze kadrowym <strong>%employeeNumber%</strong> został usunięta w systemie.</p>
+  <p><strong>Email kontaktowy:</strong> %email%</p>
+
+email.user.changeActive.subject: "Pracownik został zaktualizowany - zmiana statusu"
+email.user.changeActive.body: |
+  <p>Pracownik <strong>%firstName% %lastName%</strong> o numerze kadrowym <strong>%employeeNumber%</strong> został zmodyfikowany w systemie. Została zmieniona aktywność pracownika.</p>
+  <p><strong>Email kontaktowy:</strong> %email%</p>

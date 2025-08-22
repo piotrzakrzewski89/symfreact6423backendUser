@@ -6,62 +6,64 @@ namespace App\Domain\Entity;
 
 use App\Domain\Enum\UserRoleEnum;
 use App\Domain\Repository\UserRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[UniqueEntity('email')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private int $id;
 
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?Uuid $uuid = null;
 
-    #[ORM\Column(type: 'uuid', nullable: true)]
-    private ?Uuid $companyId = null;
+    #[ORM\Column(type: 'uuid', nullable: false)]
+    private Uuid $company;
 
-    #[ORM\Column(length: 100, unique: true)]
-    private ?string $email = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $password = null;
+    #[ORM\Column(length: 100, unique: true, nullable: false)]
+    private string $email;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $firstName = null;
+    private ?string $password = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $lastName = null;
+    #[ORM\Column(length: 255, nullable: false)]
+    private string $firstName;
+
+    #[ORM\Column(length: 255, nullable: false)]
+    private string $lastName;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $lastLoginAt = null;
+    private ?DateTimeImmutable $lastLoginAt = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $lastFailedLoginAt = null;
+    private ?DateTimeImmutable $lastFailedLoginAt = null;
 
-    #[ORM\Column(name: 'created_at', type: 'datetime_immutable', options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private ?\DateTimeImmutable $createdAt = null;
+    #[ORM\Column(nullable: false)]
+    private DateTimeImmutable $createdAt;
 
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
+    #[ORM\Column(nullable: true)]
+    private ?DateTimeImmutable $updatedAt = null;
 
-    #[ORM\ManyToOne(targetEntity: self::class)]
+    #[ORM\ManyToOne(targetEntity: Admin::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private self $createdBy;
+    private Admin $createdBy;
 
-    #[ORM\ManyToOne(targetEntity: self::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?self $updatedBy = null;
+    #[ORM\ManyToOne(targetEntity: Admin::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Admin $updatedBy = null;
 
     #[ORM\Column]
-    private ?bool $isActive = null;
+    private bool $isActive;
+
+    #[ORM\Column]
+    private bool $isDeleted;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $deletedAt = null;
@@ -77,13 +79,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->uuid = Uuid::v4();
         $this->isActive = true;
+        $this->isDeleted = false;
+        $this->uuid = Uuid::v4();
         $this->roles = [UserRoleEnum::USER->value];
         $this->createdAt = new \DateTimeImmutable();
     }
 
-    public function getId(): ?int
+    public function activate(Admin $admin): void
+    {
+        $this->isActive = true;
+        $this->updatedBy = $admin;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function deactivate(Admin $admin): void
+    {
+        $this->isActive = false;
+        $this->updatedBy = $admin;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function softDelete(Admin $admin): void
+    {
+        $this->isDeleted = true;
+        $this->isActive = false;
+        $this->deletedAt = new \DateTimeImmutable();
+        $this->updatedBy = $admin;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function getId(): int
     {
         return $this->id;
     }
@@ -100,14 +126,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getCompanyId(): ?Uuid
+    public function getCompany(): ?Uuid
     {
-        return $this->companyId;
+        return $this->company;
     }
 
-    public function setCompanyId(?Uuid $companyId): static
+    public function setCompany(Uuid $company): static
     {
-        $this->companyId = $companyId;
+        $this->company = $company;
 
         return $this;
     }
@@ -129,7 +155,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function setPassword(string $password): static
+    public function setPassword(?string $password): static
     {
         $this->password = $password;
 
@@ -141,7 +167,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->firstName;
     }
 
-    public function setFirstName(?string $firstName): static
+    public function setFirstName(string $firstName): static
     {
         $this->firstName = $firstName;
 
@@ -220,6 +246,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function isDeleted(): ?bool
+    {
+        return $this->isDeleted;
+    }
+
+    public function setIsDeleted(bool $isDeleted): static
+    {
+        $this->isDeleted = $isDeleted;
+
+        return $this;
+    }
+
     public function getDeletedAt(): ?\DateTimeImmutable
     {
         return $this->deletedAt;
@@ -268,36 +306,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getCreatedBy(): ?self
+    public function getCreatedBy(): ?Admin
     {
         return $this->createdBy;
     }
 
-    public function setCreatedBy(?self $createdBy): static
+    public function setCreatedBy(?Admin $createdBy): static
     {
         $this->createdBy = $createdBy;
 
         return $this;
     }
 
-    public function getUpdatedBy(): ?self
+    public function getUpdatedBy(): ?Admin
     {
         return $this->updatedBy;
     }
 
-    public function setUpdatedBy(?self $updatedBy): static
+    public function setUpdatedBy(?Admin $updatedBy): static
     {
         $this->updatedBy = $updatedBy;
 
         return $this;
-    }
-
-    public function getUserIdentifier(): string
-    {
-        return $this->email;
-    }
-
-    public function eraseCredentials(): void
-    {
     }
 }

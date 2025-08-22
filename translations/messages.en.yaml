@@ -1,0 +1,19 @@
+email.user.created.subject: "Employee has been created"
+email.user.created.body: |
+  <p>Employee <strong>%firstName% %lastName%</strong> personnel number %employeeNumber% has been created in the system.</p>
+  <p><strong>Contact email:</strong> %email%</p>
+
+email.user.updated.subject: "Employee has been updated"
+email.user.updated.body: |
+  <p>Employee <strong>%firstName% %lastName%</strong> personnel number %employeeNumber% has been updated in the system.</p>
+  <p><strong>Contact email:</strong> %email%</p>
+
+email.user.deleted.subject: "Employee has been deleted"
+email.user.deleted.body: |
+  <p>Employee <strong>%firstName% %lastName%</strong> personnel number %employeeNumber% has been deleted in the system.</p>
+  <p><strong>Contact email:</strong> %email%</p>
+
+email.user.changeActive.subject: "Employee has been updated - activity change"
+email.user.changeActive.body: |
+  <p>Employee <strong>%firstName% %lastName%</strong> personnel number %employeeNumber% has been updated in the system. Activity has been changed.</p>
+  <p><strong>Contact email:</strong> %email%</p>

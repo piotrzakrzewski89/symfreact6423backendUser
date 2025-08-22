@@ -1,0 +1,16 @@
+framework:
+  messenger:
+    default_bus: messenger.bus.default
+    transports:
+      rabbitmq:
+        dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
+        options:
+          exchange:
+            name: send_mail
+            type: direct
+          queues:
+            send_mail_event: ~
+    
+    routing:
+      'App\Application\Message\SendMailMessage':
+        - rabbitmq

@@ -12,6 +12,11 @@ services:
         networks:
             - network_user
             - network_rabbit
+        healthcheck:
+            test: ["CMD", "php", "-v"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
             
     user-www:
         build: ./docker/www
@@ -23,6 +28,9 @@ services:
             - ./docker/www/conf.d:/etc/nginx/conf.d
         networks:
             - network_user
+        depends_on:
+            php:
+                condition: service_healthy
 
     user-db:
         image: postgres:latest
@@ -42,6 +50,20 @@ services:
             retries: 5
         networks:
             - network_user
+    user-worker:
+        container_name: user-worker
+        build:
+            context: ./docker/php
+        command: php bin/console messenger:consume company_users --time-limit=3600 --memory-limit=128M
+        restart: always
+        depends_on:
+            php:
+                condition: service_healthy
+        networks:
+            - network_user
+            - network_rabbit
+        volumes:
+            - ./:/app
 
 volumes:
     user_db_data:
