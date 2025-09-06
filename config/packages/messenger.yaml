@@ -10,7 +10,22 @@ framework:
             type: direct
           queues:
             send_mail_event: ~
-    
+      user:
+        dsn: "%env(MESSENGER_TRANSPORT_DSN)%"
+        options:
+          exchange:
+            name: user
+            type: direct
+          queues:
+            send_user_event: ~
+      doctrine_log:
+        dsn: "doctrine://default"
+        options:
+          table_name: messenger_messages
     routing:
       'App\Application\Message\SendMailMessage':
         - rabbitmq
+        - doctrine_log
+      'App\Application\Message\UserMessage':
+        - user
+        - doctrine_log

@@ -7,4 +7,5 @@ namespace App\Domain\Enum;
 enum UserRoleEnum: string
 {
     case USER = 'ROLE_USER';
+    case ADMIN_CMS = 'ROLE_ADMIN_CMS';
 }

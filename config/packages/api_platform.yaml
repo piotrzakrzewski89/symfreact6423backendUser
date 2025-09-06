@@ -1,5 +1,5 @@
 api_platform:
-    title: Hello API Platform Companies Mikro
+    title: Hello API Platform Users Mikro
     version: 1.0.0
     defaults:
         stateless: true

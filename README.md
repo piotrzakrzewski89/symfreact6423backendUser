@@ -1,4 +1,4 @@
-# symfreact6423backendCompany
+# symfreact6423backendUser
 
 docker compose exec php bin/console d:d:c --env=dev
 docker compose exec php bin/console d:m:m --env=dev
@@ -19,7 +19,8 @@ dphp vendor/bin/phpcbf src - automatyczna naprawa
 dphp bin/console d:m:diff
 dphp bin/console d:m:m --env=dev --no-interaction
 dphp bin/console d:m:m --env=test --no-interaction
-dphp bin/console doctrine:fixtures:load --env=dev --no-interaction
+dphp bin/console d:m:m --env=dev --no-interaction
 dphp bin/console doctrine:fixtures:load --env=test --no-interaction
+dphp bin/console doctrine:fixtures:load --env=dev --no-interaction
 
-dphp bin/console make:entity --regenerate App\\Domain\\Entity\\Company
+dphp bin/console make:entity --regenerate App\\Domain\\Entity\\User

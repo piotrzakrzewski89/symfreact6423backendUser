@@ -9,73 +9,61 @@ use App\Domain\Repository\UserRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
-#[UniqueEntity('email')]
+#[ORM\Table(
+    name: '"user"',
+    uniqueConstraints: [
+        new ORM\UniqueConstraint(name: 'uniq_user_uuid', columns: ['uuid']),
+        new ORM\UniqueConstraint(name: 'uniq_user_email', columns: ['email']),
+        new ORM\UniqueConstraint(name: 'uniq_user_employee_company', columns: ['companyUuid', 'employee_number'])
+    ],
+    indexes: [
+        new ORM\Index(name: 'idx_user_company', columns: ['companyUuid'])
+    ]
+)]
 class User
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private int $id;
-
-    #[ORM\Column(type: 'uuid', unique: true)]
+    #[ORM\Column(type: 'uuid')]
     private ?Uuid $uuid = null;
 
     #[ORM\Column(type: 'uuid', nullable: false)]
-    private Uuid $company;
+    private Uuid $companyUuid;
+    #[ORM\Column(type: 'uuid', nullable: false)]
+    private Uuid $createdBy;
+    #[ORM\Column(type: 'uuid', nullable: true)]
+    private ?Uuid $updatedBy = null;
 
-    #[ORM\Column(length: 100, unique: true, nullable: false)]
+    #[ORM\Column(length: 100, nullable: false)]
     private string $email;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $password = null;
-
     #[ORM\Column(length: 255, nullable: false)]
     private string $firstName;
-
     #[ORM\Column(length: 255, nullable: false)]
     private string $lastName;
+    #[ORM\Column(length: 50, nullable: false)]
+    private string $employeeNumber;
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
 
     #[ORM\Column(nullable: true)]
     private ?DateTimeImmutable $lastLoginAt = null;
-
     #[ORM\Column(nullable: true)]
     private ?DateTimeImmutable $lastFailedLoginAt = null;
-
     #[ORM\Column(nullable: false)]
     private DateTimeImmutable $createdAt;
-
     #[ORM\Column(nullable: true)]
     private ?DateTimeImmutable $updatedAt = null;
-
-    #[ORM\ManyToOne(targetEntity: Admin::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    private Admin $createdBy;
-
-    #[ORM\ManyToOne(targetEntity: Admin::class)]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?Admin $updatedBy = null;
-
-    #[ORM\Column]
-    private bool $isActive;
-
-    #[ORM\Column]
-    private bool $isDeleted;
-
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $deletedAt = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $passwordChangedAt = null;
-
-    #[ORM\Column(length: 50)]
-    private ?string $employeeNumber = null;
-
-    #[ORM\Column(type: 'json')]
-    private array $roles = [];
+    #[ORM\Column]
+    private bool $isActive;
+    #[ORM\Column]
+    private bool $isDeleted;
 
     public function __construct()
     {
@@ -86,30 +74,30 @@ class User
         $this->createdAt = new \DateTimeImmutable();
     }
 
-    public function activate(Admin $admin): void
+    public function activate(Uuid $adminUuid): void
     {
         $this->isActive = true;
-        $this->updatedBy = $admin;
+        $this->updatedBy = $adminUuid;
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function deactivate(Admin $admin): void
+    public function deactivate(Uuid $adminUuid): void
     {
         $this->isActive = false;
-        $this->updatedBy = $admin;
+        $this->updatedBy = $adminUuid;
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function softDelete(Admin $admin): void
+    public function softDelete(Uuid $adminUuid): void
     {
         $this->isDeleted = true;
         $this->isActive = false;
         $this->deletedAt = new \DateTimeImmutable();
-        $this->updatedBy = $admin;
+        $this->updatedBy = $adminUuid;
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -126,14 +114,38 @@ class User
         return $this;
     }
 
-    public function getCompany(): ?Uuid
+    public function getCompanyUuid(): ?Uuid
     {
-        return $this->company;
+        return $this->companyUuid;
     }
 
-    public function setCompany(Uuid $company): static
+    public function setCompanyUuid(Uuid $companyUuid): static
     {
-        $this->company = $company;
+        $this->companyUuid = $companyUuid;
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?Uuid
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(Uuid $createdBy): static
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getUpdatedBy(): ?Uuid
+    {
+        return $this->updatedBy;
+    }
+
+    public function setUpdatedBy(?Uuid $updatedBy): static
+    {
+        $this->updatedBy = $updatedBy;
 
         return $this;
     }
@@ -146,18 +158,6 @@ class User
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
-        return $this;
-    }
-
-    public function getPassword(): ?string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(?string $password): static
-    {
-        $this->password = $password;
 
         return $this;
     }
@@ -182,6 +182,30 @@ class User
     public function setLastName(string $lastName): static
     {
         $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    public function getEmployeeNumber(): ?string
+    {
+        return $this->employeeNumber;
+    }
+
+    public function setEmployeeNumber(string $employeeNumber): static
+    {
+        $this->employeeNumber = $employeeNumber;
+
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
 
         return $this;
     }
@@ -234,6 +258,18 @@ class User
         return $this;
     }
 
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
     public function isActive(): ?bool
     {
         return $this->isActive;
@@ -254,78 +290,6 @@ class User
     public function setIsDeleted(bool $isDeleted): static
     {
         $this->isDeleted = $isDeleted;
-
-        return $this;
-    }
-
-    public function getDeletedAt(): ?\DateTimeImmutable
-    {
-        return $this->deletedAt;
-    }
-
-    public function setDeletedAt(?\DateTimeImmutable $deletedAt): static
-    {
-        $this->deletedAt = $deletedAt;
-
-        return $this;
-    }
-
-    public function getPasswordChangedAt(): ?\DateTimeImmutable
-    {
-        return $this->passwordChangedAt;
-    }
-
-    public function setPasswordChangedAt(?\DateTimeImmutable $passwordChangedAt): static
-    {
-        $this->passwordChangedAt = $passwordChangedAt;
-
-        return $this;
-    }
-
-    public function getEmployeeNumber(): ?string
-    {
-        return $this->employeeNumber;
-    }
-
-    public function setEmployeeNumber(string $employeeNumber): static
-    {
-        $this->employeeNumber = $employeeNumber;
-
-        return $this;
-    }
-
-    public function getRoles(): array
-    {
-        return $this->roles;
-    }
-
-    public function setRoles(array $roles): static
-    {
-        $this->roles = $roles;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?Admin
-    {
-        return $this->createdBy;
-    }
-
-    public function setCreatedBy(?Admin $createdBy): static
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getUpdatedBy(): ?Admin
-    {
-        return $this->updatedBy;
-    }
-
-    public function setUpdatedBy(?Admin $updatedBy): static
-    {
-        $this->updatedBy = $updatedBy;
 
         return $this;
     }

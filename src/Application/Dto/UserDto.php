@@ -30,7 +30,7 @@ class UserDto
     public string $lastName;
 
     public ?Uuid $uuid;
-    public Uuid $company;
+    public Uuid $companyUuid;
     public ?DateTimeImmutable $createdAt;
     public ?DateTimeImmutable $updatedAt;
     public ?DateTimeImmutable $deletedAt;
@@ -41,7 +41,7 @@ class UserDto
     public function __construct(
         ?int $id,
         ?Uuid $uuid = null,
-        Uuid $company,
+        Uuid $companyUuid,
         string $email,
         string $firstName,
         string $lastName,
@@ -56,7 +56,7 @@ class UserDto
     ) {
         $this->id = $id;
         $this->uuid = $uuid;
-        $this->company = $company;
+        $this->companyUuid = $companyUuid;
         $this->email = $email;
         $this->firstName = $firstName;
         $this->lastName = $lastName;
@@ -74,7 +74,7 @@ class UserDto
         return new self(
             $user->getId(),
             $user->getUuid(),
-            $user->getCompany(),
+            $user->getCompanyUuid(),
             $user->getEmail(),
             $user->getFirstName(),
             $user->getLastName(),
